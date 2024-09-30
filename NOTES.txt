@@ -1,0 +1,38 @@
+BASADO EN: https://www.mongodb.com/docs/drivers/php/laravel-mongodb/current/
+
+
+
+
+
+REQUERIMIENTOS:
+-Tener una instancia activa en Atlas MongoDB
+-Tener instalado VS Code
+-PHP (8.2>)
+-Composer
+-Laravel 10.x>
+-MongoDB PHP Extension:
+    Para incluirla en el PHP si aún no se ha hecho:
+    -" php --ini "
+    *Para ver donde está el archivo de configuración (php.ini), que corresponde a lo de "Loaded Configuration File:" en la salida del comando
+
+    -De esta página: https://pecl.php.net/package/mongodb/1.19.3/windows (puede haber verisones más recientes, ver en https://pecl.php.net/package/mongodb (opción "DLL" al lado de logo Windows)*) descargar el archivo correspondiente a la versión de PHP que tenga (y si es TS o NTS)
+    -De carpeta que se descargue, copiar archivo "php_mongodb.dll" y pegarlo dentro de donde estén las extensiones de PHP (en caso de laragon, dentro de ruta C:\laragon\bin\php\php-8.2.19-nts-Win32-vs16-x64\ext)
+    -En archivo php.ini, con base a documentación ( https://www.php.net/manual/en/mongodb.installation.windows.php ) agregar la línea: " extension=php_mongodb.dll " (yo la coloqué, buscando la palabra "extension", en parte donde estaban líneas como "extension=php_redis.dll", "extension=redis" "extension=fileinfo")
+    -Detener y volver a iniciar servidor (en laragon si se está empleando)
+
+
+
+
+
+***Para crear el repositorio con los archivos del proyecto directamente dentro de él en lugar de que quede la carpeta resultante del comando "composer create-project laravel/laravel *nombre*" y dentro de ella los archivos del proyecto:
+-Se crea repositorio en GitHub (en web con opción "New" y todo lo demás)
+-Se crea el proyecto localmente (puede ser en escritorio por ejemplo, para ir a esa ubicación usar "cd .\Desktop\") con comando " composer create-project laravel/laravel laravel-mongodb-v5.x-documentation "
+ -Se corre para ver si todo bien con comando "php artisan serve"
+  *Puede haber detalle con lo de "sqlite", para ello solo cambiar en el .env de "DB_CONNECTION=sqlite" a "DB_CONNECTION=mysql"
+-Se abre terminal en el proyecto y se ejecutan:
+ -"git init" (inicializa Git en el proyecto)
+ -"git add ."
+ -"git commit -m "Initial commit"
+ -"git branch -M main" (se crea, y a su vez se cambia hacia rama "main")
+ -"git remote add origin https://github.com/erickavendanoh/laravel-roles-permisos-auth-CRUD.git" (se añade el repositorio remoto de GitHub como el origen (origin) para el repositorio local)
+ -"git push -u origin main" (ya con el repositorio local configurado correctamente, se sube la rama main al repositorio remoto. La opción -u (o --set-upstream) establece la rama main local para rastrear la rama main en el repositorio remoto. Esto permite en el futuro simplemente usar "git push" sin tener que especificar la rama para subir cambios y así)
