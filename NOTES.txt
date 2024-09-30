@@ -32,7 +32,7 @@ REQUERIMIENTOS:
 -Se abre terminal en el proyecto y se ejecutan:
  -"git init" (inicializa Git en el proyecto)
  -"git add ."
- -"git commit -m "Initial commit"
- -"git branch -M main" (se crea, y a su vez se cambia hacia rama "main")
- -"git remote add origin https://github.com/erickavendanoh/laravel-roles-permisos-auth-CRUD.git" (se añade el repositorio remoto de GitHub como el origen (origin) para el repositorio local)
- -"git push -u origin main" (ya con el repositorio local configurado correctamente, se sube la rama main al repositorio remoto. La opción -u (o --set-upstream) establece la rama main local para rastrear la rama main en el repositorio remoto. Esto permite en el futuro simplemente usar "git push" sin tener que especificar la rama para subir cambios y así)
+ -" git commit -m "Commit inicial. Creación del poryecto y primeras notas" "
+ -"git branch -M master" (se crea, y a su vez se cambia hacia rama "master")
+ -"git remote add origin https://github.com/erickavendanoh/laravel-mongodb-v5.x-documentation.git" (se añade el repositorio remoto de GitHub como el origen (origin) para el repositorio local)
+ -"git push -u origin master" (ya con el repositorio local configurado correctamente, se sube la rama master al repositorio remoto. La opción -u (o --set-upstream) establece la rama master local para rastrear la rama master en el repositorio remoto. Esto permite en el futuro simplemente usar "git push" sin tener que especificar la rama para subir cambios y así)
