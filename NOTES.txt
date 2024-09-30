@@ -98,4 +98,28 @@ Sin embargo, la opción "file" solo es recomendable en proyectos pequeños, como
 -En punto "Post a request to the API", el comando que pide ejecutar " curl -H "Content-Type: application/json" --data @movie.json http://localhost:8000/api/movies " da error, y esto se debe a que como se está empleando PowerShell (que emplea la terminal de VS Code en Windows) el "@" se interpreta diferente que en las terminales de Unix, por ello se emplea Invoke-RestMethod que es un método propio de PowerShell para hacer solicitudes HTTP, quedando así:
 " Invoke-WebRequest -Uri http://localhost:8000/api/movies -Method Post -Headers @{ "Content-Type" = "application/json" } -Body (Get-Content -Raw -Path "C:\laragon\www\laravel\movie.json") "
 
+*Otra forma de hacerlo es con Postman:
+-En la URL colocar: http://localhost:8000/api/movies
+-Cambiar el método a "POST"
+-En parte de "Headers" añadir una fila, en "Key" poner "Content-Type" y en "Value" poner "application/json"
+-En parte de "Body" con opción "raw" colocar el registro en json:
+"
+{
+    "title": "The Laravel MongoDB Quick Start 2",
+    "year": 2024,
+    "runtime": 15,
+    "imdb": {
+        "rating": 9.5,
+        "votes": 1
+    },
+    "plot": "This movie entry was created by running through the Laravel MongoDB Quick Start tutorial."
+}
+"
+-"Send"
+-Checar en BD el nuevo registro
 
+
+
+
+
+-
