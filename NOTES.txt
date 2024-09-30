@@ -1,11 +1,12 @@
 BASADO EN: https://www.mongodb.com/docs/drivers/php/laravel-mongodb/current/
+*Se siguió paso por paso la documentación, pero aspectos que se debían detallar un poco más o hacer de una manera un poco distinta o así son los plasmados aquí.
 
 
 
 
 
 REQUERIMIENTOS:
--Tener una instancia activa en Atlas MongoDB
+-Tener una instancia activa en MongoDB Atlas
 -Tener instalado VS Code
 -PHP (8.2>)
 -Composer
@@ -36,3 +37,65 @@ REQUERIMIENTOS:
  -"git branch -M master" (se crea, y a su vez se cambia hacia rama "master")
  -"git remote add origin https://github.com/erickavendanoh/laravel-mongodb-v5.x-documentation.git" (se añade el repositorio remoto de GitHub como el origen (origin) para el repositorio local)
  -"git push -u origin master" (ya con el repositorio local configurado correctamente, se sube la rama master al repositorio remoto. La opción -u (o --set-upstream) establece la rama master local para rastrear la rama master en el repositorio remoto. Esto permite en el futuro simplemente usar "git push" sin tener que especificar la rama para subir cambios y así)
+
+Ya después para clonarlo en otras partes, o igual para ya borrar el repositorio local y clonarlo y trabajarlo ya directamente del repositorio en GitHub:
+-Borrar el proyecto localmente (esto solo aplica en PC donde se creó el proyecto, si no se omite)
+-Ir al repositorio en GitHub y copiar el link de "HTTPS" que aparece en opción "Code"
+-Ir a la ubicación donde se desea clonar el repositorio, abrir una terminal y ejeuctar " git clone https://github.com/erickavendanoh/laravel-mongodb-v5.x-documentation.git "
+-Abrir la carpeta resultante en VS Code
+-Crear un archivo ".env" y dentro pegar lo contenido en "env.txt"
+-Abrir una terminal y ejecutar "composer install"
+Listo. Correrlo con comandos necesarios ("php artisan migrate", y otros si es el caso)
+
+
+
+
+
+-" composer require mongodb/laravel-mongodb:^5.0 "
+
+
+
+
+
+Pasos de documentación "Create a MongoDB Deployment", "Create a Connection String" se resumen en esto:
+-*Se tenía ya una cuenta de MongoDB, y en Atlas se tenía ya creado un cluster M0 llamado "cluster0"... y se empleará el "Sample DataSet" que brinda MongoDB Atlas con la opción "Load Sample DataSet" (que está dentro del cluster seleccionado, pestaña "Overview"->En los "...")
+-Sacar la cadena de conexión (en MongoDB Atlas, sección "DEPLOYMENT"->"Database"->clic sobre el cluster donde está la BD que se empleará->pestaña "Overview"->Opción "Connect"->"Drivers" (en select "Driver" va "PHP" y en "Version" "PHPLIB 1.11 + mondodb-1.10 or later")->Copiar la connection string que viene en parte de abajo). *Reemplazar "<db_password>" con mi contraseña
+
+En adelante se sigue la documentación de nuevo como tal, aunque aspectos que se vean necesarios de aclarar o de cosas que se tuvieron que hacer un poco diferente se detallarán también...
+
+
+
+
+
+-En sección "Write Data to MongoDB" en punto "Add an API route that calls the controller function" el comando "php artisan install:api" después de ejecutarlo pregunta si realizar migraciones y si se selecciona que si ("y") da un error: 
+"
+0001_01_01_000000_create_users_table ............................................................................................... 742.21ms FAIL
+
+   MongoDB\Driver\Exception\CommandException 
+
+  Index build failed: 5f88dafd-aa88-4090-8d4d-40b230da7ff6: Collection sample_mflix.sessions ( 2c6032a6-06fe-4a87-8273-3743a9e26904 ) :: caused by :: E11000 duplicate key error collection: sample_mflix.sessions index: id_1 dup key: { id: null }
+"
+Este problema se debe porque al parecer hay un problema en como MongoDB almacena y gestiona las sesiones en Laravel. Ya que incluso en la colección "sessions" (generada automáticamente debido a que en archivo .env "SESSION_DRIVER=database" y en config/session.php "'driver' => env('SESSION_DRIVER', 'database'),") se crea un registro cada vez que se recarga la página.
+Para corregirlo:
+-En archivo .env: 
+cambiar en "SESSION_DRIVER=database" de "database" a "file" 
+-En config/session.php:
+cambiar en "'driver' => env('SESSION_DRIVER', 'database')," de "database" a "file"
+-Eliminar coleción "sessions" generada en BD (en este caso "sample_mflix")
+-Ejecutar comandos para limpiar la Caché de Configuración:
+"
+php artisan config:cache
+php artisan config:clear
+php artisan cache:clear
+"
+Con esto, ya no se creará una tabla (colección en el caso de MongoDB) "sessions" donde se van registrando las sesiones en la página (esto es por defecto cuando se crea un proyecto de Laravel), sino que ya se irán guardando a manera de archivos dentro de storage/framework/sessions.
+
+Sin embargo, la opción "file" solo es recomendable en proyectos pequeños, como este, pero para proyectos ya en producción no lo es tanto, ya que si el proyecto está en varios servidores cada uno tendría sus copias, además de que cuando se reinicie o se pierda acceso al sistema de archivos las sesiones podrían perderse. Por otro lado, almacenando esta información en la BD hay más seguridad, además de que es más robusto y escalable.
+
+-Ahora sí se puede ejecutar " php artisan migrate "
+
+
+-En punto "Post a request to the API", el comando que pide ejecutar " curl -H "Content-Type: application/json" --data @movie.json http://localhost:8000/api/movies " da error, y esto se debe a que como se está empleando PowerShell (que emplea la terminal de VS Code en Windows) el "@" se interpreta diferente que en las terminales de Unix, por ello se emplea Invoke-RestMethod que es un método propio de PowerShell para hacer solicitudes HTTP, quedando así:
+" Invoke-WebRequest -Uri http://localhost:8000/api/movies -Method Post -Headers @{ "Content-Type" = "application/json" } -Body (Get-Content -Raw -Path "C:\laragon\www\laravel\movie.json") "
+
+
