@@ -75,6 +75,7 @@ class MovieController extends Controller
 
 
     //Inicio. CON RESPECTO A SECCIÓN "Usage Examples" DE DOCUMENTACIÓN OFICIAL
+
     public function findADocument()
     {
         $movie = Movie::where('directors', 'Rob Reiner')
@@ -178,5 +179,67 @@ class MovieController extends Controller
             ->get();
         echo $ratings;
     }
+
     //Fin. CON RESPECTO A SECCIÓN "Usage Examples" DE DOCUMENTACIÓN OFICIAL
+
+
+    //Inicio. CON RESPECTO A SECCIÓN "Fundamentals" DE DOCUMENTACIÓN OFICIAL
+
+    //Inicio. CON RESPECTO A SECCIÓN "Read Operations" DE DOCUMENTACIÓN OFICIAL
+
+    public function retrieveDocumentsThatMatchAQuery()
+    {
+        $movies = Movie::where('year', 2010)
+             ->where('imdb.rating', '>', 8.5)
+             ->get();
+         return view('browse_movies', [
+             'movies' => $movies
+         ]);
+    }
+
+    public function searchTextFields()
+    {
+        //A text search retrieves documents that contain a term or a phrase in the text-indexed fields (previously created). En sí como dice la documentación, se debió haber creado un text index en el campo plot de la colección "movies", pero como eso está después se omitió por ahora. Si realiza la búsqueda, pero es porque cuando se cargó el Sample Dataset la colección "movies" ya tenía un índice de tipo text index, que es compuesto y busca en campos cast, plot, genres y title cuando se emplea operador $search, por lo que si busca en base a ese texto pero no solo será con respecto a campo plot, sino que también con respecto a los otros.
+            $movies = Movie::where('$text', ['$search' => '"love story"'])
+            ->orderBy('score', ['$meta' => 'textScore']) //a text search assigns a numerical text score to indicate how closely each result matches the string in your query filter. You can sort the results by relevance by using the orderBy() method to sort on the textScore metadata field. You can access this metadata by using the $meta operator
+            ->get();
+        return view('browse_movies', [
+        'movies' => $movies
+        ]);
+    }
+
+    public function skipAndLimitResults()
+    {
+        $movies = Movie::where('year', 1999)
+             ->skip(2)
+             ->take(3)
+             ->get();
+         return view('browse_movies', [
+             'movies' => $movies
+         ]);
+    }
+
+    public function sortQueryResults()
+    {
+        $movies = Movie::where('countries', 'Indonesia')
+            ->orderBy('year')
+            ->orderBy('title', 'desc')
+            ->get();
+        return view('browse_movies', [
+            'movies' => $movies
+        ]);
+    }
+
+    public function returnTheFirstResult()
+    {
+        $movie = Movie::where('runtime', 30)
+            ->orderBy('_id')
+            ->first();
+        echo $movie;
+    }
+
+    //Fin. CON RESPECTO A SECCIÓN "Read Operations" DE DOCUMENTACIÓN OFICIAL
+
+    //Fin. CON RESPECTO A SECCIÓN "Fundamentals" DE DOCUMENTACIÓN OFICIAL
+
 }

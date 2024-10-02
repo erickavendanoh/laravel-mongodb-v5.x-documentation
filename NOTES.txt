@@ -1,5 +1,6 @@
 BASADO EN: https://www.mongodb.com/docs/drivers/php/laravel-mongodb/current/
 *Se siguió paso por paso la documentación, pero aspectos que se debían detallar un poco más o hacer de una manera un poco distinta o así son los plasmados aquí.
+*En algunos casos los comentarios se agregaron directamente en los archivos correspondientes
 
 
 

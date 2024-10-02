@@ -1,16 +1,22 @@
 <?php
 
 use App\Http\Controllers\MovieController;
+use App\Models\Movie;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
+//Inicio. CON RESPECTO A SECCIÓN "Quick Start" DE DOCUMENTACIÓN OFICIAL
+
 Route::get('/browse_movies', [MovieController::class, 'show']);
+
+//Fin. CON RESPECTO A SECCIÓN "Quick Start" DE DOCUMENTACIÓN OFICIAL
 
 
 //Inicio. CON RESPECTO A SECCIÓN "Usage Examples" DE DOCUMENTACIÓN OFICIAL
+
 Route::get('/find_a_document', [MovieController::class, 'findADocument']);
 Route::get('/find_multiple_documents', [MovieController::class, 'findMultipleDocuments']);
 Route::get('/insert_a_document', [MovieController::class, 'insertADocument']);
@@ -29,4 +35,100 @@ Route::get('/run_a_command', function(){
         echo $coll['name'] . "<br>\n";
     }
 });
+
 //Fin. CON RESPECTO A SECCIÓN "Usage Examples" DE DOCUMENTACIÓN OFICIAL
+
+
+//Inicio. CON RESPECTO A SECCIÓN "Fundamentals" DE DOCUMENTACIÓN OFICIAL
+
+//Inicio. CON RESPECTO A SECCIÓN "Databases and Collections" DE DOCUMENTACIÓN OFICIAL
+
+// list the collections in a database 
+Route::get('/get_collections/{method}', function($method){
+    //La BD a la que se hace referencia es la declarada en atributo 'database' dentro de la respectiva connection dentro del arreglo 'connections=>[]' (en este caso 'mongodb', que fue la definida en " 'default' => env('DB_CONNECTION'), ", cuyo valor de variable de entorno DB_CONNECTION en .env es "mongodb") en config\database.php
+    if($method == 'listCollections'){
+        $collections = DB::connection('mongodb')->getMongoDB()->listCollections(); //Empleando Query Builder. 
+        //El método listCollections() devuelve un CollectioninfoIterator por lo que no se puede imprimir o recorrer directamente lo resultante en $collections, para hacerlo...
+        foreach ($collections as $collection) {
+            // Obtener el nombre de la colección
+            $collectionName = $collection->getName();
+            echo "Colección: " . $collectionName . "<br/>";
+        }
+    } 
+    else if($method == 'getTablesListing'){
+        Schema::getTablesListing(); //Al parecer no funciona
+    } 
+    else if($method == 'getTables'){
+        $collections = Schema::getTables();
+        foreach($collections as $collection){
+            echo "Colección: " . $collection['name'] . "<br/>";
+        }
+    }
+});
+
+// list the fields in a collection 
+Route::get('/get_columns', function(){
+    $fields = Schema::getColumns('movies');
+    foreach($fields as $field){
+        echo "Campo: " . $field['name'] . "<br/>";
+    }
+});
+
+// checks if the specified field exists in at least one document
+Route::get('/has_column', function(){
+    $hasColumn = Schema::hasColumn('movies', 'title');
+    dd($hasColumn);
+});
+
+// checks if each specified field exists in at least one document
+Route::get('/has_columns', function(){
+    $hasColumn = Schema::hasColumns('movies', ['title', 'directors', 'cast']);
+    dd($hasColumn);
+});
+
+//Fin. CON RESPECTO A SECCIÓN "Databases and Collections" DE DOCUMENTACIÓN OFICIAL
+
+//Inicio. CON RESPECTO A SECCIÓN "Read Operations" DE DOCUMENTACIÓN OFICIAL
+
+Route::get('/retrieve_documents_that_match_a_query', [MovieController::class, 'retrieveDocumentsThatMatchAQuery']);
+
+Route::get('/match_array_field_elements/{way}', function($way){
+    //This example retrieves documents in which the countries array is exactly
+    if($way == 'extract_array_match'){
+        $movies = Movie::where('countries', ['Indonesia', 'Canada'])
+            ->get();
+    }
+    //This example retrieves documents in which the countries array contains one of the values in the array ['Mexico', 'USA']:
+    else if($way == 'element_match'){
+        $movies = Movie::whereIn('countries', ['Canada', 'Egypt'])
+            ->get();
+        //En documentación venía así, sin embargo no funcionaba:
+        /*
+        $movies = Movie::where('countries', 'in', ['Canada', 'Egypt'])
+            ->get();
+        */
+    }
+    foreach($movies as $movie){
+        echo $movie->title . '<br/>';
+    }
+});
+
+Route::get('/retrieve_all_documents_in_a_collection', function(){
+    $movies = Movie::get();
+    // $movies = Movie::all(); //lo mismo
+    foreach($movies as $movie){
+        echo $movie->title . '<br/>';
+    }
+});
+
+Route::get('/search_text_fields', [MovieController::class, 'searchTextFields']);
+
+Route::get('/skip_and_limit_results', [MovieController::class, 'skipAndLimitResults']);
+
+Route::get('/sort_query_results', [MovieController::class, 'sortQueryResults']);
+
+Route::get('/return_the_first_result', [MovieController::class, 'returnTheFirstResult']);
+
+//Fin. CON RESPECTO A SECCIÓN "Read Operations" DE DOCUMENTACIÓN OFICIAL
+
+//Fin. CON RESPECTO A SECCIÓN "Fundamentals" DE DOCUMENTACIÓN OFICIAL
