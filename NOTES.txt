@@ -128,3 +128,8 @@ esto ya que además de que las clases UTCDateTime y DateTimeImmutable no estaban
 
 
 
+
+
+Para parte de "Write Operations"...
+" php artisan make:model Concert "
+*En app\Models\Concert.php resultante cambiar el use del Model por el de MongoDB (use MongoDB\Laravel\Eloquent\Model;) y agregarle lo que viene en documentación

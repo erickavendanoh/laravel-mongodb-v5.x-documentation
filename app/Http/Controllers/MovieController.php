@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Concert;
 use App\Models\Movie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class MovieController extends Controller
 {
@@ -239,6 +241,205 @@ class MovieController extends Controller
     }
 
     //Fin. CON RESPECTO A SECCIÓN "Read Operations" DE DOCUMENTACIÓN OFICIAL
+
+    //Inicio. CON RESPECTO A SECCIÓN "Write Operations" DE DOCUMENTACIÓN OFICIAL
+
+    //No existía la colección "concerts" en BD "sample_mflix" (que es a la que se hace referencia en config\database.php en connection "mongodb" como indicaba documentación) pero se creará con esta primera inserción
+    public function insertADocumentExample()
+    {
+        $concert = new Concert();
+        $concert->performer = 'Mitsuko Uchida';
+        $concert->venue = 'Carnegie Hall';
+        $concert->genres = ['classical'];
+        $concert->ticketsSold = 2121;
+        $concert->performanceDate = Carbon::create(2024, 4, 1, 20, 0, 0, 'EST');
+        $concert->save();
+
+        $insertedId = $concert->id;
+        echo 'Success! Inserted id: '. $insertedId;
+    }
+
+    public function insertMultipleDocumentsExample()
+    {
+        $data = [
+            [
+                'performer' => 'Brad Mehldau',
+                'venue' => 'Philharmonie de Paris',
+                'genres' => [ 'jazz', 'post-bop' ],
+                'ticketsSold' => 5745,
+                'performanceDate' => Carbon::createFromFormat('Y-m-d H:i:s', '2025-02-12 20:00:00', 'CET'),
+            ],
+            [
+                'performer' => 'Billy Joel',
+                'venue' => 'Madison Square Garden',
+                'genres' => [ 'rock', 'soft rock', 'pop rock' ],
+                'ticketsSold' => 12852,
+                'performanceDate' => Carbon::createFromFormat('Y-m-d H:i:s', '2025-02-12 20:00:00', 'CET'),
+            ],
+        ];
+        
+        $result = Concert::insert($data);
+        if($result == 1) echo 'Success!';
+    }
+
+    public function updateADocumentExampleFirstWay()
+    {
+        $concert = Concert::first();
+        echo 'document before the update: ' . $concert . '<br/>';
+        $concert->venue = 'Manchester Arena';
+        $concert->ticketsSold = 9543;
+        $concert->save();
+        echo 'document after the update: ' . $concert;
+    }
+
+    public function updateADocumentExampleSecondWay()
+    {
+        $concert = Concert::where(['performer' => 'Brad Mehldau'])
+            ->orderBy('id')
+            ->first()
+            ->update(['venue' => 'Manchester Arena', 'ticketsSold' => 9543]);
+            if($concert == 1) echo 'Success!';
+    }
+
+    public function updateMultipleDocumentsExample()
+    {
+        $result = Concert::whereIn('venue', ['Philharmonie de Paris', 'Soldier Field'])
+            ->update(['venue' => 'Concertgebouw', 'ticketsSold' => 0]);
+        echo 'updated documents: ' . $result;
+    }
+
+    //upsert actualiza el documento si existe o lo inserta en caso de que no exista
+    //hay dos maneras, con método upsert(), y con update() pasándole como opción (parámetro) "['upsert' => true]"
+    //-upsert()
+    /*
+    YourModel::upsert(
+        [* documents to update or insert *],
+        '* unique field *',
+        [* fields to update *],
+    );
+    */
+    public function upsertMethod()
+    {
+        //Aunque en el documento o documentos correspondientes al primer parámetro, vengan valores distintos en otros campos de documentos ya existentes, solo se actualizarán aquellos declarados en el tercer parámetro.
+        $result = Concert::upsert(
+            [
+            ['performer' => 'Angel Olsen', 'venue' => 'Academy of Music', 'ticketsSold' => 275],
+            ['performer' => 'Darondo', 'venue' => 'Cafe du Nord', 'ticketsSold' => 300],
+        ], 
+        'performer', 
+        ['ticketsSold']);
+        if($result) echo 'success! result: ' . $result;
+    }
+    //-update() with upsert option to true
+    /*
+    YourModel::where(* match criteria *)
+        ->update(
+        [* update data *],
+        ['upsert' => true]);
+    */
+    public function updateMethodWithUpsertOption()
+    {
+        $result = Concert::where(['performer' => 'Jon Batiste', 'venue' => 'Radio City Music Hall'])
+        ->update(
+            ['genres' => ['R&B', 'soul'], 'ticketsSold' => 4000],
+            ['upsert' => true],
+        );
+        if($result) echo 'success!';
+    }
+
+    //Arrays
+    //-add
+    /*
+    YourModel::where(<match criteria>)
+        ->push(
+            <field name>,
+            [<values>], // array or single value to add
+            unique: true); // whether to skip existing values
+    */
+    public function addValuesToAnArrayExample()
+    {
+        Concert::where('performer', 'Mitsuko Uchida')
+        ->push(
+            'genres',
+            ['baroque'],
+        );
+        return "1";
+    }
+    //-remove
+    /*
+    YourModel::where(<match criteria>)
+        ->pull(
+            <field name>,
+            [<values>]); // array or single value to remove
+    */
+    public function removeValuesFromAnArrayExample()
+    {
+        Concert::where('performer', 'Mitsuko Uchida')
+        ->pull(
+            'genres',
+            ['dance-pop', 'classical'],
+        );
+        return "1";
+    }
+    //-update
+    //Currently, the Laravel Integration offers this operation only on the DB facade and not on the Eloquent ORM.
+    /*
+    DB::connection('mongodb')
+        ->getCollection(<collection name>)
+        ->updateOne(
+            <match criteria>,
+            ['$set' => ['<array field>.$' => <replacement value>]]);
+    */
+    //Se borro el documento correspondiente a 'performer' => 'Mitsuko Uchida' y se volvió a ejecutar lo de ruta /sample_document_insetion_to_examples_of_update_arrays_in_a_document para poder hacer lo de esta función
+    public function updateTheValueOfAnArrayElementExample()
+    {
+        //The $ operator represents the first array element that matches the query
+        $match = ['performer' => 'Mitsuko Uchida', 'genres' => 'dance-pop'];
+        $update = ['$set' => ['genres.$' => 'contemporary']];
+        DB::connection('mongodb')
+            ->getCollection('concerts')
+            ->updateOne($match, $update);
+        return "1";
+    }
+
+    public function deleteADocumentExampleFirstWay()
+    {
+        $concert = Concert::first();
+        $documentsDeleted = $concert->delete();
+        if($documentsDeleted) echo 'success!';
+    }
+
+    public function deleteADocumentExampleSecondWay()
+    {
+        $id = '67043b5cbdddccbdb905cd54';
+        $documentsDeleted = Concert::destroy($id);
+        echo 'documents deleted: ' . $documentsDeleted;
+    }
+
+    public function deleteADocumentExampleThirdWay()
+    {
+        $documentsDeleted = Concert::where('venue', 'Carnegie Hall')
+        ->limit(1)
+        ->delete();
+        if($documentsDeleted) echo 'success!';
+    }
+
+    public function deleteMultipleDocumentsExampleFirstWay()
+    {
+        $documentsDeleted = $ids = ['670452048975130903c04e88', '670452048975130903c04e89'];
+        Concert::destroy($ids);
+        echo 'documents deleted: ' . count($documentsDeleted);
+        //NOTA: The destroy() method performance suffers when passed large lists. For better performance, use Model::whereIn('id', $ids)->delete() instead.
+    }
+
+    public function deleteMultipleDocumentsExampleSecondWay()
+    {
+        $documentsDeleted = Concert::where('ticketsSold', '>', 290)
+            ->delete();
+        if($documentsDeleted) echo 'success!';
+    }
+
+    //Fin. CON RESPECTO A SECCIÓN "Write Operations" DE DOCUMENTACIÓN OFICIAL
 
     //Fin. CON RESPECTO A SECCIÓN "Fundamentals" DE DOCUMENTACIÓN OFICIAL
 

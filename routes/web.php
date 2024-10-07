@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MovieController;
+use App\Models\Concert;
 use App\Models\Movie;
 use Illuminate\Support\Facades\Route;
 
@@ -130,5 +131,47 @@ Route::get('/sort_query_results', [MovieController::class, 'sortQueryResults']);
 Route::get('/return_the_first_result', [MovieController::class, 'returnTheFirstResult']);
 
 //Fin. CON RESPECTO A SECCIÓN "Read Operations" DE DOCUMENTACIÓN OFICIAL
+
+//Inicio. CON RESPECTO A SECCIÓN "Write Operations" DE DOCUMENTACIÓN OFICIAL
+
+Route::get('/insert_a_document_example', [MovieController::class, 'insertADocumentExample']);
+
+Route::get('/insert_multiple_documents_example', [MovieController::class, 'insertMultipleDocumentsExample']);
+
+Route::get('/update_a_document_example_first_way', [MovieController::class, 'updateADocumentExampleFirstWay']);
+
+Route::get('/update_a_document_example_second_way', [MovieController::class, 'updateADocumentExampleSecondWay']);
+
+Route::get('/update_multiple_documents_example', [MovieController::class, 'updateMultipleDocumentsExample']);
+
+Route::get('/upsert_method', [MovieController::class, 'upsertMethod']);
+
+Route::get('/update_method_with_upsert_option', [MovieController::class, 'updateMethodWithUpsertOption']);
+
+Route::get('/sample_document_insetion_to_examples_of_update_arrays_in_a_document', function(){
+    $concert = Concert::create([
+        'performer' => 'Mitsuko Uchida',
+        'genres' => ['classical', 'dance-pop'],
+    ]);
+    if($concert) echo 'success!';
+});
+
+Route::get('/add_values_to_an_array_example', [MovieController::class, 'addValuesToAnArrayExample']);
+
+Route::get('/remove_values_from_an_array_example', [MovieController::class, 'removeValuesFromAnArrayExample']);
+
+Route::get('/update_the_value_of_an_array_element_example', [MovieController::class, 'updateTheValueOfAnArrayElementExample']);
+
+Route::get('/delete_a_document_example_first_way', [MovieController::class, 'deleteADocumentExampleFirstWay']);
+
+Route::get('/delete_a_document_example_second_way', [MovieController::class, 'deleteADocumentExampleSecondWay']);
+
+Route::get('/delete_a_document_example_third_way', [MovieController::class, 'deleteADocumentExampleThirdWay']);
+
+Route::get('/delete_multiple_documents_example_first_way', [MovieController::class, 'deleteMultipleDocumentsExampleFirstWay']);
+
+Route::get('/delete_multiple_documents_example_second_way', [MovieController::class, 'deleteMultipleDocumentsExampleSecondWay']);
+
+//Fin. CON RESPECTO A SECCIÓN "Write Operations" DE DOCUMENTACIÓN OFICIAL
 
 //Fin. CON RESPECTO A SECCIÓN "Fundamentals" DE DOCUMENTACIÓN OFICIAL
